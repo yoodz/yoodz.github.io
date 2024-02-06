@@ -32,6 +32,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           # 项目配置的打包目录名称
-          folder: dist
+          folder: public
           # 部署后提交到的分支
           branch: static-pages
