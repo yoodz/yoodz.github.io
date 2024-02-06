@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="技术, 摄影, 生活, 博客">
+    
+    <meta name="author" content="dayong">
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://yoodz.github.io/archives/840d27f9.html"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+        <meta name="description" content="CJS（Commonjs）使用在后端的，为了适应前端有了AMD（Asynchronous Module Definition），或CMD（Common Module Definition）。AMD 和 CMD 是社区的开发者们制定的模块加载方案，并不是语言层面的标准。从 ES6 开始，在语言标准的层面上，实现了模块化功能ESM（ES6 Module），而且实现得相当简单，完全可以取代 Common">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CJS &amp; ESM 模块转换">
+<meta property="og:url" content="https://yoodz.github.io/archives/840d27f9.html">
+<meta property="og:site_name" content="开发者-dayong">
+<meta property="og:description" content="CJS（Commonjs）使用在后端的，为了适应前端有了AMD（Asynchronous Module Definition），或CMD（Common Module Definition）。AMD 和 CMD 是社区的开发者们制定的模块加载方案，并不是语言层面的标准。从 ES6 开始，在语言标准的层面上，实现了模块化功能ESM（ES6 Module），而且实现得相当简单，完全可以取代 Common">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-08-08T09:10:41.000Z">
+<meta property="article:modified_time" content="2024-02-06T15:38:05.528Z">
+<meta property="article:author" content="dayong">
+<meta property="article:tag" content="Javascript">
+<meta name="twitter:card" content="summary">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="https://static.afunny.top/2023/202307221839388.jpg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://static.afunny.top/2023/202307221839388.jpg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="https://static.afunny.top/2023/202307221839388.jpg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            CJS &amp; ESM 模块转换 -
+        
+        Afunny
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+        <style>
+    :root {
+        --preloader-background-color: #fff;
+        --preloader-text-color: #000;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --preloader-background-color: #202124;
+            --preloader-text-color: #fff;
+        }
+    }
+
+    @media (prefers-color-scheme: light) {
+        :root {
+            --preloader-background-color: #fff;
+            --preloader-text-color: #000;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .ml13 {
+            font-size: 2.6rem !important; /* Adjust this value as needed */
+        }
+    }
+
+    .preloader {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* Tailwind 'gap-4' is 1rem */
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        padding: 12px;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh; /* 'h-screen' is 100% of the viewport height */
+        background-color: var(--preloader-background-color);
+        z-index: 1100; /* 'z-[1100]' sets the z-index */
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .ml13 {
+        font-size: 3.2rem;
+        /* text-transform: uppercase; */
+        color: var(--preloader-text-color);
+        letter-spacing: -1px;
+        font-weight: 500;
+        font-family: 'Chillax-Variable', sans-serif;
+        text-align: center;
+    }
+
+    .ml13 .word {
+        display: inline-flex;
+        flex-wrap: wrap;
+        white-space: nowrap;
+    }
+
+    .ml13 .letter {
+        display: inline-block;
+        line-height: 1em;
+    }
+</style>
+
+<div class="preloader">
+    
+<script src="/js/libs/anime.min.js"></script>
+
+    <h1 class="ml13">
+        Afunny
+    </h1>
+    <script>
+        var textWrapper = document.querySelector('.ml13');
+        // Split text into words
+        var words = textWrapper.textContent.trim().split(' ');
+
+        // Clear the existing content
+        textWrapper.innerHTML = '';
+
+        // Wrap each word and its letters in spans
+        words.forEach(function(word) {
+            var wordSpan = document.createElement('span');
+            wordSpan.classList.add('word');
+            wordSpan.innerHTML = word.replace(/\S/g, "<span class='letter'>$&</span>");
+            textWrapper.appendChild(wordSpan);
+            textWrapper.appendChild(document.createTextNode(' ')); // Add space between words
+        });
+
+
+        anime.timeline({loop: true})
+            .add({
+                targets: '.ml13 .letter',
+                translateY: [100,0],
+                translateZ: 0,
+                opacity: [0,1],
+                easing: "easeOutExpo",
+                duration: 1400,
+                delay: (el, i) => 300 + 30 * i
+            }).add({
+            targets: '.ml13 .letter',
+            translateY: [0,-100],
+            opacity: [1,0],
+            easing: "easeInExpo",
+            duration: 1200,
+            delay: (el, i) => 100 + 30 * i
+        });
+
+        let themeStatus = JSON.parse(localStorage.getItem('REDEFINE-THEME-STATUS'))?.isDark;
+
+        // If the theme status is not found in local storage, check the preferred color scheme
+        if (themeStatus === undefined || themeStatus === null) {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                themeStatus = 'dark';
+            } else {
+                themeStatus = 'light';
+            }
+        }
+
+        // Now you can use the themeStatus variable in your code
+        if (themeStatus) {
+            document.documentElement.style.setProperty('--preloader-background-color', '#202124');
+            document.documentElement.style.setProperty('--preloader-text-color', '#fff');
+        } else {
+            document.documentElement.style.setProperty('--preloader-background-color', '#fff');
+            document.documentElement.style.setProperty('--preloader-text-color', '#000');
+        }
+
+        window.addEventListener('load', function () {
+            hidePreloaderAfterTimeout(1000); // Hide after 1000 milliseconds once the window has loaded
+        });
+
+        // Backup failsafe: Hide preloader after a maximum of 5000 milliseconds, regardless of the window load event
+        hidePreloaderAfterTimeout(5000);
+
+        function hidePreloaderAfterTimeout(delay) {
+            setTimeout(function () {
+                var preloader = document.querySelector('.preloader');
+                preloader.style.opacity = '0';
+                setTimeout(function () {
+                    preloader.style.display = 'none';
+                }, 200);
+            }, delay);
+        }
+    </script>
+</div>
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/assets/build/styles.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/fonts.css">
+
+    
+<link rel="stylesheet" href="/fonts/Satoshi/satoshi.css">
+
+    <!--- Font Part-->
+    
+    
+    
+        <link href="" rel="stylesheet">
+    
+    
+
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"yoodz.github.io","root":"/","language":"zh-CN"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"title_alignment":"left","headings_top_spacing":{"h1":"5rem","h2":"4rem","h3":"2.8rem","h4":"2.5rem","h5":"2.2rem","h6":"2rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":["Lv1"]},"code_block":{"copy":true,"style":"mac","font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":true,"lazyload":true,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":true,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":true,"open_graph":true,"google_analytics":{"enable":false,"id":null},"busuanzi_counter":{"enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"pjax":true},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"Afunny","subtitle":{"text":["每个人都有自己的一片森林，所以你的在哪里?"],"hitokoto":{"enable":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":0,"backing_delay":1500,"loop":false,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null}]},"mermaid":{"enable":false,"version":"9.3.0"}},"version":"2.6.1","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-solid fa-folders"},"Status":{"path":"https://uptime.afunny.top/","icon":"fa-regular fa-chart-bar"},"About":{"icon":"fa-regular fa-user","submenus":{"Me":"/about","Github":"https://github.com/yoodz"}}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"cloud"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":null,"show_on_mobile":true,"links":null},"article_date_format":"auto","categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2022/8/17 11:45:14"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":true};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+<!--        <span class="swup-progress-icon">-->
+<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+<!--        </span>-->
+    
+</div>
+
+
+<main class="page-container" id="swup">
+
+    
+
+    <div class="main-content-container">
+
+
+        <div class="main-content-header">
+            <header class="navbar-container px-6 md:px-12">
+
+    <div class="navbar-content ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                Afunny
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="active"
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-solid fa-folders fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="https://uptime.afunny.top/"
+                                        >
+                                    <i class="fa-regular fa-chart-bar fa-fw"></i>
+                                    状态
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="has-dropdown"
+                                   href="#"
+                                        onClick=&#34;return false;&#34;>
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    <i class="fa-solid fa-chevron-down fa-fw"></i>
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                                    <ul class="sub-menu">
+                                        
+                                            <li>
+                                                <a href="/about">
+                                                    ME
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="https://github.com/yoodz">
+                                                    GITHUB
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-screen w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-solid fa-folders fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="https://uptime.afunny.top/"
+                        >
+                            <span>
+                                状态
+                            </span>
+                            
+                                <i class="fa-regular fa-chart-bar fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item-sub text-base my-1.5 flex flex-col w-full">
+                        
+                        <div class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary cursor-pointer text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                             navbar-data-toggle="submenu-About"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-solid fa-chevron-right fa-sm fa-fw transition-all"></i>
+                            
+                        </div>
+                        
+
+                        
+                            <div class="flex-col items-start px-2 py-2 hidden" data-target="submenu-About">
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/about">ME</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="https://github.com/yoodz">GITHUB</a>
+                                    </div>
+                                
+                            </div>
+                        
+                    </li>
+            
+
+            
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">21</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">20</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="main-content-body">
+
+            
+
+            <div class="main-content">
+
+                
+                    <div class="post-page-container flex relative justify-between box-border w-full h-full">
+    <div class="article-content-container">
+
+        <div class="article-title relative w-full">
+            
+                <div class="w-full flex items-center pt-6 justify-start">
+                    <h1 class="article-title-regular text-second-text-color text-4xl md:text-6xl font-bold px-2 sm:px-6 md:px-8 py-3">CJS &amp; ESM 模块转换</h1>
+                </div>
+            
+            </div>
+
+        
+            <div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+                <div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+                    <img src="https://static.afunny.top/2023/202307221839388.jpg">
+                </div>
+                <div class="info flex flex-col justify-between">
+                    <div class="author flex items-center">
+                        <span class="name text-default-text-color text-lg font-semibold">dayong</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2023-08-08 09:10:41</span>
+        <span class="mobile">2023-08-08 09:10:41</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2024-02-06 15:38:05</span>
+            <span class="mobile">2024-02-06 15:38:05</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Javascript/">Javascript</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+                    </div>
+                </div>
+            </div>
+        
+
+        
+
+
+        <div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+            <p>CJS（Commonjs）使用在后端的，为了适应前端有了AMD（Asynchronous Module Definition），或CMD（Common Module Definition）。AMD 和 CMD 是社区的开发者们制定的模块加载方案，并不是语言层面的标准。<strong>从 ES6 开始，在语言标准的层面上，实现了模块化功能ESM（</strong>ES6 Module<strong>），而且实现得相当简单，完全可以取代 CommonJS 和 CMD、AMD 规范，成为浏览器和服务器通用的模块解决方案</strong>。</p>
+<h1 id="回顾没有模块的加载"><a href="#回顾没有模块的加载" class="headerlink" title="回顾没有模块的加载"></a>回顾没有模块的加载</h1><p>总结有三个问题</p>
+<ul>
+<li>全局作用域污染</li>
+<li>数据保护问题</li>
+<li>模块之间相互依赖问题</li>
+</ul>
+<h2 id="全局作用域污染"><a href="#全局作用域污染" class="headerlink" title="全局作用域污染"></a>全局作用域污染</h2><p>内嵌式和外联式。最初的js都是卸载html文件的script标签里。后来随着逻辑变复杂，开始抽离出单独的文件，采用外联式引入到页面内。</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.html 内嵌</span></span><br><span class="line">&lt;script&gt;</span><br><span class="line">  <span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">var</span> b = <span class="number">2</span>;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">// index.html 外联</span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./a.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./b.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./c.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure></div>
+
+<p>Javascript在es6之前没有模块系统。所有的变量存在全局作用域中，所以有全局作用域污染的问题。</p>
+<h2 id="数据保护问题"><a href="#数据保护问题" class="headerlink" title="数据保护问题"></a>数据保护问题</h2><p>手动划分模块。模块属性可以随意被修改。比如	app.moduleA.name &#x3D; ‘rename’</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.html</span></span><br><span class="line">&lt;script&gt;</span><br><span class="line">	app.<span class="property">moduleA</span> = &#123;&#125;</span><br><span class="line">	app.<span class="property">moduleA</span>.<span class="property">name</span> = <span class="string">&#x27;hello world&#x27;</span></span><br><span class="line">	app.<span class="property">moduleB</span>  = &#123;&#125;</span><br><span class="line">	app.<span class="property">moduleB</span>.<span class="property">name</span> = <span class="string">&#x27;hello js&#x27;</span></span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></div>
+
+<p>闭包可以解决全局作用域，和数据保护问题。</p>
+<h1 id="闭包创建局部作用域"><a href="#闭包创建局部作用域" class="headerlink" title="闭包创建局部作用域"></a>闭包创建局部作用域</h1><p>闭包内的属性，通过暴漏的方法，获取和修改属性值。</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> moduleA = (<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">&#x27;zdy-a&#x27;</span>;</span><br><span class="line">    <span class="keyword">var</span> age = <span class="number">23</span>;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">getName</span>: <span class="function">() =&gt;</span> &#123;</span><br><span class="line">			<span class="comment">// Uncaught TypeError: Cannot read properties of undefined (reading &#x27;getName&#x27;)</span></span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(moduleB.<span class="title function_">getName</span>(), <span class="string">&#x27;moduleDemo-26&#x27;</span>)</span><br><span class="line">            <span class="keyword">return</span> name;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">rename</span>: <span class="keyword">function</span>(<span class="params">newName</span>) &#123;</span><br><span class="line">            name = newName</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)()</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(moduleA.<span class="title function_">getName</span>(), <span class="string">&#x27;moduleDemo-30&#x27;</span>)</span><br><span class="line">moduleA.<span class="title function_">rename</span>(<span class="string">&#x27;shayebushi&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> moduleB = (<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">&#x27;zdy-b&#x27;</span>;</span><br><span class="line">    <span class="keyword">var</span> age = <span class="number">18</span>;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">getName</span>: <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> name;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">rename</span>: <span class="keyword">function</span>(<span class="params">newName</span>) &#123;</span><br><span class="line">            name = newName</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)()</span><br></pre></td></tr></table></figure></div>
+
+<p>因为有加载顺序，所有先加载的方法不能够调用后加载方法。有模块间相互依赖的问题。</p>
+<h1 id="常见的模块加载方式"><a href="#常见的模块加载方式" class="headerlink" title="常见的模块加载方式"></a>常见的模块加载方式</h1><h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><p>CJS - Node.js</p>
+<p>每个文件是一个模块。每个模块有两个变量，require 和 module 。require 用来加载模块。module代表当前的模块。exports是module上的属性(module.exports &#x3D; {})，保存了当前模块导出的变量。</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lib.js</span></span><br><span class="line"><span class="keyword">const</span> name = <span class="string">&#x27;zdy&#x27;</span>;</span><br><span class="line"><span class="keyword">const</span> age = <span class="number">18</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">    name,</span><br><span class="line">    age</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 也可以这样导出</span></span><br><span class="line"><span class="comment">// exports.name = name;</span></span><br><span class="line"><span class="comment">// exports.age = age;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">const</span> lib = <span class="built_in">require</span>(<span class="string">&#x27;./lib&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(lib.<span class="property">name</span>, <span class="string">&#x27;index-3&#x27;</span>) <span class="comment">// zdy index-3</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(lib.<span class="property">age</span>, <span class="string">&#x27;index-4&#x27;</span>) <span class="comment">// 18 index-4</span></span><br></pre></td></tr></table></figure></div>
+
+<p>同时为了方便，Node.js 在实现 CommonJS 规范时，为每个模块提供一个 exports的私有变量，指向 module.exports。类似 <strong>var</strong> exports <strong>&#x3D;</strong> module.exports。所以也可以使用exports导出。</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lib.js</span></span><br><span class="line"><span class="keyword">const</span> name = <span class="string">&#x27;zdy&#x27;</span>;</span><br><span class="line"><span class="keyword">const</span> age = <span class="number">18</span>;</span><br><span class="line"><span class="comment">// 也可以这样导出</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">name</span> = name;</span><br><span class="line"><span class="built_in">exports</span>.<span class="property">age</span> = age;</span><br></pre></td></tr></table></figure></div>
+
+<p>require 命令的基本功能是，读入并执行一个 js 文件，然后返回该模块的 exports 对象。如果没有发现指定模块，会报错。另外<code>require</code> 的是被导出的值的拷贝。</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>AMD - Require.js</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// amd-1.js</span></span><br><span class="line"><span class="title function_">define</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="string">&#x27;use strict&#x27;</span>;</span><br><span class="line">  <span class="keyword">const</span> name = <span class="string">&#x27;amd1&#x27;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="attr">name</span>: name</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// amd-1.js, 依赖amd-1.js</span></span><br><span class="line"><span class="title function_">define</span>(<span class="keyword">function</span>(<span class="params"><span class="built_in">require</span></span>) &#123;</span><br><span class="line">  <span class="string">&#x27;use strict&#x27;</span>;</span><br><span class="line">  <span class="keyword">var</span> amd1 = <span class="built_in">require</span>(<span class="string">&#x27;./amd-1&#x27;</span>)</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(amd1.<span class="property">name</span>, <span class="string">&#x27;amd-2-4&#x27;</span>)</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// index.html</span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span></span><br><span class="line"><span class="language-javascript"><span class="language-xml">    requirejs([<span class="string">&#x27;./amd-2.js&#x27;</span>]);</span></span></span><br><span class="line"><span class="language-javascript"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure></div>
+
+<p>CMD - Sea.js</p>
+<h2 id="客户端-服务端加载"><a href="#客户端-服务端加载" class="headerlink" title="客户端&amp;服务端加载"></a>客户端&amp;服务端加载</h2><p>ESM -ES6</p>
+<p>ESM的模块加载,两种导出方式，三种导入方式，使用export 和 import加载</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 导出方式</span></span><br><span class="line"><span class="keyword">const</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">export</span> &#123; a &#125;;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> a;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 导入方式</span></span><br><span class="line"><span class="keyword">import</span> &#123; a &#125; <span class="keyword">from</span> <span class="string">&#x27;./xxx&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> a <span class="keyword">from</span> <span class="string">&#x27;./xxx&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> a <span class="keyword">from</span> <span class="string">&#x27;./xxx&#x27;</span>;</span><br></pre></td></tr></table></figure></div>
+
+<h1 id="ESM-和-CJS的区别"><a href="#ESM-和-CJS的区别" class="headerlink" title="ESM 和 CJS的区别"></a>ESM 和 CJS的区别</h1><p>CJS运行时确认导出的接口，导出的是对象；ESM编译时确定模块依赖。</p>
+<p>require导入值的拷贝</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// requireModule.js</span></span><br><span class="line"><span class="keyword">var</span> age = <span class="number">19</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">changeAge</span>(<span class="params">value</span>) &#123;</span><br><span class="line">    age = value</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">    age,</span><br><span class="line">    changeAge</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// main.js</span></span><br><span class="line"><span class="keyword">const</span> requireModule = <span class="built_in">require</span>(<span class="string">&#x27;./requireModule&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(requireModule.<span class="property">age</span>, <span class="string">&#x27;index-4&#x27;</span>) <span class="comment">// 19</span></span><br><span class="line">requireModule.<span class="title function_">changeAge</span>(<span class="number">45</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(requireModule.<span class="property">age</span>, <span class="string">&#x27;index-11&#x27;</span>) <span class="comment">// 19</span></span><br></pre></td></tr></table></figure></div>
+
+<p>import 导入值的引用</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// importModule.js</span></span><br><span class="line"><span class="keyword">var</span> age = <span class="number">19</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">changeAge</span>(<span class="params">value</span>) &#123;</span><br><span class="line">    age = value</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123;</span><br><span class="line">    age,</span><br><span class="line">    changeAge</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// main.js</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> importModule <span class="keyword">from</span> <span class="string">&quot;./importModule.js&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(importModule.<span class="property">age</span>, <span class="string">&#x27;index-4&#x27;</span>) <span class="comment">// 19</span></span><br><span class="line">importModule.<span class="title function_">changeAge</span>(<span class="number">89</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(importModule.<span class="property">age</span>, <span class="string">&#x27;index-6&#x27;</span>) <span class="comment">// 89</span></span><br></pre></td></tr></table></figure></div>
+
+<h1 id="ESM-和-CJS-互相转换"><a href="#ESM-和-CJS-互相转换" class="headerlink" title="ESM 和 CJS 互相转换"></a><strong><strong>ESM 和 CJS 互相转换</strong></strong></h1><p>开发中可能会遇到一些需要相互转换的场景。</p>
+<ul>
+<li>ESM 引入只支持 CJS 的库</li>
+<li>开发 npm 库的时候，写 ESM 然后编译成 CJS。</li>
+</ul>
+<h2 id="ESM转CJS"><a href="#ESM转CJS" class="headerlink" title="ESM转CJS"></a>ESM转CJS</h2><ul>
+<li>npm库一般是ESM开发，同时提供ESM和CJS。</li>
+<li>业务开发使用ESM，考虑兼容使用打包工具（webpck）编译成CJS线上运行。<ul>
+<li>ESM规范编写代码，使用**<code>import</code><strong>、</strong><code>export</code>**;</li>
+<li>babel等编译器将ESM代码转成CJS代码；</li>
+<li>浏览器不支持CJS规范，所以webpack按照CJS规范实现了类似**<code>require</code><strong>和</strong><code>module.exports</code>**的模块加载机制。</li>
+</ul>
+</li>
+</ul>
+<h3 id="export导出"><a href="#export导出" class="headerlink" title="export导出"></a>export导出</h3><p>默认导出</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> deafult <span class="string">&#x27;monday&#x27;</span>;</span><br><span class="line">转换为</span><br><span class="line">modules.<span class="property">exports</span> = <span class="string">&#x27;monday&#x27;</span>;</span><br></pre></td></tr></table></figure></div>
+
+<p>命名导出</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> a =  <span class="number">123</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> b = <span class="number">456</span>;</span><br><span class="line">转换成</span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span>.<span class="property">a</span> = <span class="number">123</span></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span>.<span class="property">b</span> = <span class="number">234</span></span><br></pre></td></tr></table></figure></div>
+
+<p>默认导出+命名导出</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mixModules.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="number">666</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> a = <span class="number">123</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> b = <span class="number">234</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">import</span> lib <span class="keyword">from</span> <span class="string">&#x27;./mixModules&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123;a, b&#125; <span class="keyword">from</span> <span class="string">&#x27;./mixModules&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(lib, a, b)</span><br></pre></td></tr></table></figure></div>
+
+<p>上面的代码webpack编译后，删除注释后结果如下：</p>
+<div class="highlight-container" data-rel="Jsx"><figure class="iseeu highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">  <span class="string">&quot;use strict&quot;</span>;</span><br><span class="line">  <span class="keyword">var</span> __webpack_modules__ = (&#123;</span><br><span class="line">    <span class="string">&quot;./src/index.js&quot;</span>: (<span class="keyword">function</span> (<span class="params">__unused_webpack_module, __webpack_exports__, __webpack_require__</span>) &#123;</span><br><span class="line">      <span class="built_in">eval</span>(<span class="string">&quot;__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _mixModules__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mixModules */ \&quot;./src/mixModules.js\&quot;);\n\n\n\nconsole.log(_mixModules__WEBPACK_IMPORTED_MODULE_0__[\&quot;default\&quot;], _mixModules__WEBPACK_IMPORTED_MODULE_0__.a, _mixModules__WEBPACK_IMPORTED_MODULE_0__.b)\n\n//# sourceURL=webpack://webpack/./src/index.js?&quot;</span>);</span><br><span class="line">    &#125;),</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;./src/mixModules.js&quot;</span>: (<span class="keyword">function</span> (<span class="params">__unused_webpack_module, __webpack_exports__, __webpack_require__</span>) &#123;</span><br><span class="line">      <span class="built_in">eval</span>(<span class="string">&quot;__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, &#123;\n/* harmony export */   a: function() &#123; return /* binding */ a; &#125;,\n/* harmony export */   b: function() &#123; return /* binding */ b; &#125;\n/* harmony export */ &#125;);\n/* harmony default export */ __webpack_exports__[\&quot;default\&quot;] = (666);\nconst a = 123\nconst b = 234\n\n//# sourceURL=webpack://webpack/./src/mixModules.js?&quot;</span>);</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">var</span> __webpack_module_cache__ = &#123;&#125;;</span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">__webpack_require__</span>(<span class="params">moduleId</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> cachedModule = __webpack_module_cache__[moduleId];</span><br><span class="line">    <span class="keyword">if</span> (cachedModule !== <span class="literal">undefined</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> cachedModule.<span class="property">exports</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> <span class="variable language_">module</span> = __webpack_module_cache__[moduleId] = &#123;</span><br><span class="line">      <span class="attr">exports</span>: &#123;&#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    __webpack_modules__[moduleId](<span class="variable language_">module</span>, <span class="variable language_">module</span>.<span class="property">exports</span>, __webpack_require__);</span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">module</span>.<span class="property">exports</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  !<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    __webpack_require__.<span class="property">d</span> = <span class="keyword">function</span> (<span class="params"><span class="built_in">exports</span>, definition</span>) &#123;</span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">var</span> key <span class="keyword">in</span> definition) &#123;</span><br><span class="line">        <span class="keyword">if</span> (__webpack_require__.<span class="title function_">o</span>(definition, key) &amp;&amp; !__webpack_require__.<span class="title function_">o</span>(<span class="built_in">exports</span>, key)) &#123;</span><br><span class="line">          <span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(<span class="built_in">exports</span>, key, &#123; <span class="attr">enumerable</span>: <span class="literal">true</span>, <span class="attr">get</span>: definition[key] &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;();</span><br><span class="line"></span><br><span class="line">  !<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    __webpack_require__.<span class="property">o</span> = <span class="keyword">function</span> (<span class="params">obj, prop</span>) &#123; <span class="keyword">return</span> <span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">hasOwnProperty</span>.<span class="title function_">call</span>(obj, prop); &#125;</span><br><span class="line">  &#125;();</span><br><span class="line"></span><br><span class="line">  !<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    __webpack_require__.<span class="property">r</span> = <span class="keyword">function</span> (<span class="params"><span class="built_in">exports</span></span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="title class_">Symbol</span> !== <span class="string">&#x27;undefined&#x27;</span> &amp;&amp; <span class="title class_">Symbol</span>.<span class="property">toStringTag</span>) &#123;</span><br><span class="line">        <span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(<span class="built_in">exports</span>, <span class="title class_">Symbol</span>.<span class="property">toStringTag</span>, &#123; <span class="attr">value</span>: <span class="string">&#x27;Module&#x27;</span> &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(<span class="built_in">exports</span>, <span class="string">&#x27;__esModule&#x27;</span>, &#123; <span class="attr">value</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> __webpack_exports__ = <span class="title function_">__webpack_require__</span>(<span class="string">&quot;./src/index.js&quot;</span>);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure></div>
+
+<p>编译分析：</p>
+<ul>
+<li><strong>webpack_require</strong>.r 方法，判断引入的模块是CJS还是ESM，如果是ESM会在exports上挂在一个__esModule属性，值为true，代表这是esModule。CJS不变。</li>
+<li>导出：默认导出挂在exports.default上，其他属性挂在都exports上。参照__webpack_modules__下的”.&#x2F;src&#x2F;mixModules.js” eval方法。webpack_exports[&quot;default&quot;] &#x3D; (666);</li>
+<li>默认导入：webpack_modules下 “.&#x2F;src&#x2F;index.js” 获取默认导入取值使用的default属性。mixModules__WEBPACK_IMPORTED_MODULE_0_[&quot;default&quot;]</li>
+</ul>
+<h2 id="CJS转ESM"><a href="#CJS转ESM" class="headerlink" title="CJS转ESM"></a>CJS转ESM</h2><p>场景：写 ESM 项目，引入了一个只有 CJS 的库时，且编译出 ESM 时，才会用到 CJS 转 ESM。</p>
+<p>要运行 ESM 引入 CJS 的代码，有两种方式：</p>
+<ul>
+<li>把 ESM 转 CJS，然后运行 CJS</li>
+<li>把 CJS 转成 ESM，然后运行 ESM</li>
+</ul>
+<p>webpack属于第一种方式，所以webpack 写 ESM，然后引入 CJS 的时候，不会遇到问题。</p>
+<p>第二种方式，之后整理。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a class="link"   href="https://juejin.cn/post/7048276970768957477" >ESM和CJS模块杂谈 <i class="fa-regular fa-arrow-up-right-from-square fa-sm"></i></a></p>
+<p><a class="link"   href="https://zhuanlan.zhihu.com/p/113009496" >前端科普系列-CommonJS：不是前端却革命了前端 <i class="fa-regular fa-arrow-up-right-from-square fa-sm"></i></a></p>
+<p><a class="link"   href="https://doc.yonyoucloud.com/doc/wiki/project/hello-seajs/how-seajs-works.html" >Sea.js是如何工作的？ <i class="fa-regular fa-arrow-up-right-from-square fa-sm"></i></a></p>
+<p><a class="link"   href="https://juejin.cn/post/7205897684624474168#heading-0" >终于搞懂了 ESM 和 CJS 互相转换 <i class="fa-regular fa-arrow-up-right-from-square fa-sm"></i></a></p>
+
+        </div>
+
+        
+            <div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+                <div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> CJS &amp; ESM 模块转换</li>
+        <li><strong>作者:</strong> dayong</li>
+        <li><strong>创建于
+                :</strong> 2023-08-08 09:10:41</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2024-02-06 15:38:05
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://www.afunny.top/archives/840d27f9.html
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+            </div>
+        
+
+        
+            <ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+                
+                    <li class="tag-item mx-0.5">
+                        <a href="/tags/Javascript/">#Javascript</a>&nbsp;
+                    </li>
+                
+            </ul>
+        
+
+        
+
+        
+            <div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+                
+                
+                    <div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+                        <a class="next"
+                        rel="next"
+                        href="/archives/137f79b6.html"
+                        >
+                            <span class="title flex justify-center items-center">
+                                <span class="post-nav-title-item">家里的旧笔记本做云盘</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex justify-center items-center">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
+
+
+        
+    </div>
+
+    
+        <div class="toc-content-container">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <div class="toc-title">此页目录</div>
+        <div class="page-title">CJS &amp; ESM 模块转换</div>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9E%E9%A1%BE%E6%B2%A1%E6%9C%89%E6%A8%A1%E5%9D%97%E7%9A%84%E5%8A%A0%E8%BD%BD"><span class="nav-text">回顾没有模块的加载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%B1%A1%E6%9F%93"><span class="nav-text">全局作用域污染</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E9%97%AE%E9%A2%98"><span class="nav-text">数据保护问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E5%88%9B%E5%BB%BA%E5%B1%80%E9%83%A8%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-text">闭包创建局部作用域</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8A%A0%E8%BD%BD%E6%96%B9%E5%BC%8F"><span class="nav-text">常见的模块加载方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-text">客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%8A%A0%E8%BD%BD"><span class="nav-text">客户端&amp;服务端加载</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ESM-%E5%92%8C-CJS%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">ESM 和 CJS的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ESM-%E5%92%8C-CJS-%E4%BA%92%E7%9B%B8%E8%BD%AC%E6%8D%A2"><span class="nav-text">ESM 和 CJS 互相转换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ESM%E8%BD%ACCJS"><span class="nav-text">ESM转CJS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#export%E5%AF%BC%E5%87%BA"><span class="nav-text">export导出</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CJS%E8%BD%ACESM"><span class="nav-text">CJS转ESM</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-text">参考</span></a></li></ol>
+
+    </div>
+</div>
+        </div>
+    
+</div>
+
+
+
+                
+
+            </div>
+
+            
+
+        </div>
+
+        <div class="main-content-footer">
+            <footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2022</span>
+              -
+            
+            2024&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">dayong</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共 20 篇文章
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">访问人数</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">总访问量</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.6.1</a></span>
+        </div>
+        
+            <div class="icp-info my-1"><a target="_blank" rel="nofollow" href="
+                
+                https://beian.miit.gov.cn
+                
+                ">豫ICP备2022026466号</a></div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="article-tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="right-bottom-tools page-aside-toggle">
+                <i class="fa-regular fa-outdent"></i>
+            </li>
+        
+
+        <!-- go comment -->
+        
+    </ul>
+</div>
+
+        </div>
+    
+
+    <div class="right-side-tools-container">
+        <div class="side-tools-container">
+    <ul class="hidden-tools-list">
+        <li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+            <i class="fa-regular fa-magnifying-glass-plus"></i>
+        </li>
+
+        <li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+            <i class="fa-regular fa-magnifying-glass-minus"></i>
+        </li>
+
+        <li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+            <i class="fa-regular fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+
+        <li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+            <i class="fa-regular fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="visible-tools-list">
+        <li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+            <i class="fa-regular fa-cog fa-spin"></i>
+        </li>
+        
+            <li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
+        
+    </ul>
+</div>
+
+    </div>
+
+    <div class="image-viewer-container">
+    <img src="">
+</div>
+
+
+    
+        <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+          <span class="search-input-field-pre">
+            <i class="fa-solid fa-keyboard"></i>
+          </span>
+            <div class="search-input-container">
+                <input autocomplete="off"
+                       autocorrect="off"
+                       autocapitalize="off"
+                       placeholder="搜索..."
+                       spellcheck="false"
+                       type="search"
+                       class="search-input"
+                >
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa-solid fa-times"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+</main>
+
+
+    
+<script src="/js/libs/Swup.min.js"></script>
+
+<script src="/js/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+
+
+
+<script src="/js/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/utils.js" type="module"></script>
+
+<script src="/js/main.js" type="module"></script>
+
+<script src="/js/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/tools/runtime.js"></script>
+
+    
+<script src="/js/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/libs/Typed.min.js"></script>
+
+  
+<script src="/js/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+    
+<script src="/js/libs/minimasonry.min.js"></script>
+
+    
+<script src="/js/plugins/masonry.js" type="module"></script>
+
+
+
+
+
+<div class="post-scripts" data-swup-reload-script>
+    
+        
+<script src="/js/tools/tocToggle.js" type="module"></script>
+
+<script src="/js/layouts/toc.js" type="module"></script>
+
+<script src="/js/plugins/tabs.js" type="module"></script>
+
+    
+</div>
+
+
+</body>
+</html>
