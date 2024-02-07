@@ -74,6 +74,7 @@ global:
   pjax: true
   # Whether to enable open graph
   open_graph: true
+  preloader: false
 # SITE CUSTOMIZATION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end
     
 
@@ -193,7 +194,7 @@ navbar:
     # Whether to enable
     enable: true
     # Preload search data when the page loads
-    preload: false
+    preload: true
 # NAVIGATION BAR <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end
 
 
