@@ -3,6 +3,7 @@ title: CJS & ESM 模块转换
 abbrlink: 840d27f9
 date: 2023-08-08 09:10:41
 tags: Javascript
+# thumbnail: "https://static.afunny.top/2023/202304200848795.png"
 ---
 CJS（Commonjs）使用在后端的，为了适应前端有了AMD（Asynchronous Module Definition），或CMD（Common Module Definition）。AMD 和 CMD 是社区的开发者们制定的模块加载方案，并不是语言层面的标准。**从 ES6 开始，在语言标准的层面上，实现了模块化功能ESM（**ES6 Module**），而且实现得相当简单，完全可以取代 CommonJS 和 CMD、AMD 规范，成为浏览器和服务器通用的模块解决方案**。
 
