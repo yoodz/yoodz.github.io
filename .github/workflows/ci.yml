@@ -24,8 +24,8 @@ jobs:
       # 下载依赖、打包项目
       - name: Install and Build
         run: |
-          yarn install
-          yarn build
+          npm install
+          npm run build
 
       # 部署
       - name: Deploy
