@@ -6,9 +6,6 @@ comments: 'false'
 ---
 
 ### 关于我
-> - 曾任喜马拉雅亲子儿童前端开发
-> - 现任拼多多基础电商前端开发
-
 - 技能
     - 技术栈：Javascript, Node.js, Python
     - 开发框架：React, NestJS, Flask
